@@ -32,12 +32,28 @@ class FlxTouch extends FlxPointer implements IFlxDestroyable implements IFlxInpu
 	public var released(get, never):Bool;
 	public var pressed(get, never):Bool;
 	public var justPressed(get, never):Bool;
+	public var justMoved(get, never):Bool;
 
 	var input:FlxInput<Int>;
 	var flashPoint = new Point();
 
+	public var deltaX(get, default):Float;
+	public var deltaY(get, default):Float;
+	
+	public var deltaViewX(get, default):Float;
+	public var deltaViewY(get, default):Float;
+
 	public var justPressedPosition(default, null) = FlxPoint.get();
 	public var justPressedTimeInTicks(default, null):Int = -1;
+
+	/**
+	 * Helper variables
+	 */
+	var _prevX:Float = 0;
+	
+	var _prevY:Float = 0;
+	var _prevViewX:Float = 0;
+	var _prevViewY:Float = 0;
 
 	public function destroy():Void
 	{
@@ -77,6 +93,11 @@ class FlxTouch extends FlxPointer implements IFlxDestroyable implements IFlxInpu
 	 */
 	function update():Void
 	{
+		_prevX = x;
+		_prevY = y;
+		_prevViewX = viewX;
+		_prevViewY = viewY;
+
 		input.update();
 
 		if (justPressed)
@@ -107,29 +128,33 @@ class FlxTouch extends FlxPointer implements IFlxDestroyable implements IFlxInpu
 	}
 
 	inline function get_touchPointID():Int
-	{
 		return input.ID;
-	}
 
 	inline function get_justReleased():Bool
-	{
 		return input.justReleased;
-	}
 
 	inline function get_released():Bool
-	{
 		return input.released;
-	}
 
 	inline function get_pressed():Bool
-	{
 		return input.pressed;
-	}
 
 	inline function get_justPressed():Bool
-	{
 		return input.justPressed;
-	}
+	inline function get_justMoved():Bool
+		return x != _prevX || y != _prevY;
+		
+	inline function get_deltaX():Float
+		return x - _prevX;
+		
+	inline function get_deltaY():Float
+		return y - _prevY;
+		
+	inline function get_deltaViewX():Float
+		return viewX - _prevViewX;
+		
+	inline function get_deltaViewY():Float
+		return viewY - _prevViewY;
 }
 #else
 class FlxTouch {}

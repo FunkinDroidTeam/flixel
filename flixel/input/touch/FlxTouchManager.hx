@@ -22,6 +22,16 @@ class FlxTouchManager implements IFlxInputManager
 	public var list:Array<FlxTouch>;
 
 	/**
+	 * A "wheel" variable that acts similarly to FlxMouse's wheel. For horizontal swipes.
+	 */
+	public var horizontalWheel(default, null):Int = 0;
+	
+	/**
+	 * A "wheel" variable that acts similarly to FlxMouse's wheel. For vertical swipes.
+	 */
+	public var verticalWheel(default, null):Int = 0;
+
+	/**
 	 * Storage for inactive touches (some sort of cache for them).
 	 */
 	var _inactiveTouches:Array<FlxTouch>;
@@ -30,6 +40,11 @@ class FlxTouchManager implements IFlxInputManager
 	 * Helper storage for active touches (for faster access)
 	 */
 	var _touchesCache:Map<Int, FlxTouch>;
+
+	/**
+	 * Helper variable for horizontalWheel and verticalWheel
+	 */
+	var _wheelTick:Int = -1;
 
 	/**
 	 * WARNING: can be null if no active touch with the provided ID could be found
@@ -252,12 +267,29 @@ class FlxTouchManager implements IFlxInputManager
 	 */
 	function update():Void
 	{
+		_wheelTick++;
 		var i:Int = list.length - 1;
-		var touch:FlxTouch;
+		var touch:FlxTouch = null;
 
 		while (i >= 0)
 		{
 			touch = list[i];
+			@:privateAccess
+			if (touch.justMoved && touch.pressed)
+			{
+				if (touch.x > touch._prevX)
+					verticalWheel++;
+				else if (touch.x < touch._prevY)
+					verticalWheel--;
+					
+				if (touch.y > touch._prevY)
+					horizontalWheel++;
+				else if (touch.y < touch._prevY)
+					horizontalWheel--;
+			}
+			
+			if ((touch.justReleased && !touch.justMoved) || touch.justPressed)
+				horizontalWheel = verticalWheel = 0;
 
 			// Touch ended at previous frame
 			if (touch.released && !touch.justReleased)
@@ -273,6 +305,19 @@ class FlxTouchManager implements IFlxInputManager
 			}
 
 			i--;
+		}
+		@:privateAccess
+		if ((touch == null || !touch?.pressed) && _wheelTick % 2 == 0)
+		{
+			if (horizontalWheel > 0)
+				horizontalWheel--;
+			else if (horizontalWheel < 0)
+				horizontalWheel++;
+				
+			if (verticalWheel > 0)
+				verticalWheel--;
+			else if (verticalWheel < 0)
+				verticalWheel++;
 		}
 	}
 
