@@ -25,7 +25,6 @@ class FlxTouchManager implements IFlxInputManager
 	 * A "wheel" variable that acts similarly to FlxMouse's wheel. For horizontal swipes.
 	 */
 	public var horizontalWheel(default, null):Int = 0;
-	
 	/**
 	 * A "wheel" variable that acts similarly to FlxMouse's wheel. For vertical swipes.
 	 */
@@ -277,17 +276,17 @@ class FlxTouchManager implements IFlxInputManager
 			@:privateAccess
 			if (touch.justMoved && touch.pressed)
 			{
-				if (touch.x > touch._prevX)
+				if (touch.deltaX > 20)
 					verticalWheel++;
-				else if (touch.x < touch._prevY)
+				else if (touch.x < -20)
 					verticalWheel--;
-					
-				if (touch.y > touch._prevY)
+
+				if (touch.deltaY > 20)
 					horizontalWheel++;
-				else if (touch.y < touch._prevY)
+				else if (touch.deltaY < -20)
 					horizontalWheel--;
 			}
-			
+
 			if ((touch.justReleased && !touch.justMoved) || touch.justPressed)
 				horizontalWheel = verticalWheel = 0;
 
@@ -306,6 +305,7 @@ class FlxTouchManager implements IFlxInputManager
 
 			i--;
 		}
+
 		@:privateAccess
 		if ((touch == null || !touch?.pressed) && _wheelTick % 2 == 0)
 		{
@@ -313,7 +313,7 @@ class FlxTouchManager implements IFlxInputManager
 				horizontalWheel--;
 			else if (horizontalWheel < 0)
 				horizontalWheel++;
-				
+
 			if (verticalWheel > 0)
 				verticalWheel--;
 			else if (verticalWheel < 0)
