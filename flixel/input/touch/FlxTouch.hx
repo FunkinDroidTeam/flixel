@@ -195,7 +195,7 @@ class FlxTouch extends FlxPointer implements IFlxDestroyable implements IFlxInpu
 
 	inline function get_deltaViewY():Float
 		return viewY - _prevViewY;
-	inline function get_ticksDeltaSincePress():Float
+	inline function get_ticksDeltaSincePress():Int
 		return FlxG.game.ticks - justPressedTimeInTicks;
 }
 #else
