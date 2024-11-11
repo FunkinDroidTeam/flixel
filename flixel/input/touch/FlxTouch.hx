@@ -28,29 +28,68 @@ class FlxTouch extends FlxPointer implements IFlxDestroyable implements IFlxInpu
 	 */
 	public var pressure(default, null):Float;
 
-	public var justReleased(get, never):Bool;
-	public var released(get, never):Bool;
-	public var pressed(get, never):Bool;
-	public var justPressed(get, never):Bool;
+	/**
+	 * Check to see if this touch has just been moved.
+	 */
 	public var justMoved(get, never):Bool;
-
-	var input:FlxInput<Int>;
-	var flashPoint = new Point();
-
-	public var deltaX(get, default):Float;
-	public var deltaY(get, default):Float;
 	
+	/**
+	 * Check to see if this touch is currently pressed.
+	 */
+	public var pressed(get, never):Bool;
+	/**
+	 * Check to see if this touch has just been pressed.
+	 */
+	public var justPressed(get, never):Bool;
+	/**
+	 * Check to see if this touch is currently not pressed.
+	 */
+	public var released(get, never):Bool;
+	
+	/**
+	 * Check to see if this touch has just been released.
+	 */
+	public var justReleased(get, never):Bool;
+
+	/**
+	 * Time in ticks of last press.
+	 */
+	public var justPressedTimeInTicks(default, null):Int = -1;
+
+	/**
+	 * Distance in pixels this touch has moved since the last frame in the X direction.
+	 */
+	public var deltaX(get, default):Float;
+	/**
+	 * Distance in pixels this touch has moved since the last frame in the Y direction.
+	 */
+	public var deltaY(get, default):Float;
+
+	/**
+	 * Distance in pixels this touch has moved in view space since the last frame in the X direction.
+	 */
 	public var deltaViewX(get, default):Float;
+	/**
+	 * Distance in pixels this touch has moved in view space since the last frame in the Y direction.
+	 */
 	public var deltaViewY(get, default):Float;
 
+	/**
+	 * The position of the touch when it was just pressed in FlxPoint.
+	 */
 	public var justPressedPosition(default, null) = FlxPoint.get();
-	public var justPressedTimeInTicks(default, null):Int = -1;
+	/**
+	 * Time in ticks that had passed since of last press
+	 */
+	public var ticksDeltaSincePress(get, default):Int;
 
 	/**
 	 * Helper variables
 	 */
-	var _prevX:Float = 0;
+	var input:FlxInput<Int>;
 	
+	var flashPoint = new Point();
+	var _prevX:Float = 0;
 	var _prevY:Float = 0;
 	var _prevViewX:Float = 0;
 	var _prevViewY:Float = 0;
@@ -141,20 +180,23 @@ class FlxTouch extends FlxPointer implements IFlxDestroyable implements IFlxInpu
 
 	inline function get_justPressed():Bool
 		return input.justPressed;
+
 	inline function get_justMoved():Bool
 		return x != _prevX || y != _prevY;
-		
+
 	inline function get_deltaX():Float
 		return x - _prevX;
-		
+
 	inline function get_deltaY():Float
 		return y - _prevY;
-		
+
 	inline function get_deltaViewX():Float
 		return viewX - _prevViewX;
-		
+
 	inline function get_deltaViewY():Float
 		return viewY - _prevViewY;
+	inline function get_ticksDeltaSincePress():Float
+		return FlxG.game.ticks - justPressedTimeInTicks;
 }
 #else
 class FlxTouch {}

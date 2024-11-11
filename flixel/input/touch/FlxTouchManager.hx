@@ -5,7 +5,8 @@ import openfl.Lib;
 import openfl.events.TouchEvent;
 import openfl.ui.Multitouch;
 import openfl.ui.MultitouchInputMode;
-
+import flixel.math.FlxVelocity;
+import flixel.math.FlxMath;
 /**
  * @author Zaphod
  */
@@ -24,11 +25,21 @@ class FlxTouchManager implements IFlxInputManager
 	/**
 	 * A "wheel" variable that acts similarly to FlxMouse's wheel. For horizontal swipes.
 	 */
-	public var horizontalWheel(default, null):Int = 0;
+	public var velocityX(default, null):Float = 0;
 	/**
 	 * A "wheel" variable that acts similarly to FlxMouse's wheel. For vertical swipes.
 	 */
-	public var verticalWheel(default, null):Int = 0;
+	public var velocityY(default, null):Float = 0;
+	
+	/**
+	 * The helper variable to cap velocityX, we don't want it to keep computing in such tiny numbers.
+	 */
+	var _velocityXCap:Int = 1;
+	
+	/**
+	 * The helper variable to cap velocityY, we don't want it to keep computing in such tiny numbers.
+	 */
+	var _velocityYCap:Int = 1;
 
 	/**
 	 * Storage for inactive touches (some sort of cache for them).
@@ -39,11 +50,6 @@ class FlxTouchManager implements IFlxInputManager
 	 * Helper storage for active touches (for faster access)
 	 */
 	var _touchesCache:Map<Int, FlxTouch>;
-
-	/**
-	 * Helper variable for horizontalWheel and verticalWheel
-	 */
-	var _wheelTick:Int = -1;
 
 	/**
 	 * WARNING: can be null if no active touch with the provided ID could be found
@@ -266,30 +272,49 @@ class FlxTouchManager implements IFlxInputManager
 	 */
 	function update():Void
 	{
-		_wheelTick++;
 		var i:Int = list.length - 1;
-		var touch:FlxTouch = null;
+		var touch:FlxTouch = list[i];
+		
+		// A bit messy.
+		// Compute the velocity if the touch is released (or null)
+		if (touch == null || touch?.released)
+		{
+			// Y
+			final computedVelocityY:Float = FlxVelocity.computeVelocity(velocityY, 0, 100, 0, FlxG.elapsed);
+			velocityY = (_velocityYCap == 1) ? (computedVelocityY > _velocityYCap ? computedVelocityY : 0) : (computedVelocityY < _velocityYCap ? computedVelocityY : 0);
+			
+			// X
+			final computedVelocityX:Float = FlxVelocity.computeVelocity(velocityX, 0, 100, 0, FlxG.elapsed);
+			velocityX = (_velocityXCap == 1) ? (computedVelocityX > _velocityXCap ? computedVelocityX : 0) : (computedVelocityX < _velocityXCap ? computedVelocityX : 0);
+		}
+		else
+		{
+			// Calculate the starting velocity if the touch is pre-existing.
+			// The time in seconds.
+			final _deltaTime:Float = touch.ticksDeltaSincePress / 1000;
+			
+			// Y
+			velocityY = touch.deltaY / _deltaTime;
+			_velocityYCap = (velocityY < -1) ? -1 : 1;
+			
+			velocityY = FlxMath.clamp(velocityY, -100, 100);
+			
+			if (Math.abs(touch.deltaY) <= 25)
+				velocityY = 0;
+				
+			// X
+			velocityX = touch.deltaX / _deltaTime;
+			_velocityXCap = (velocityX < -1) ? -1 : 1;
+			
+			velocityX = FlxMath.clamp(velocityX, -100, 100);
+			
+			if (Math.abs(touch.deltaX) <= 25)
+				velocityX = 0;
+		}
 
 		while (i >= 0)
 		{
 			touch = list[i];
-			@:privateAccess
-			if (touch.justMoved && touch.pressed)
-			{
-				if (touch.deltaX > 20)
-					verticalWheel++;
-				else if (touch.x < -20)
-					verticalWheel--;
-
-				if (touch.deltaY > 20)
-					horizontalWheel++;
-				else if (touch.deltaY < -20)
-					horizontalWheel--;
-			}
-
-			if ((touch.justReleased && !touch.justMoved) || touch.justPressed)
-				horizontalWheel = verticalWheel = 0;
-
 			// Touch ended at previous frame
 			if (touch.released && !touch.justReleased)
 			{
@@ -304,20 +329,6 @@ class FlxTouchManager implements IFlxInputManager
 			}
 
 			i--;
-		}
-
-		@:privateAccess
-		if ((touch == null || !touch?.pressed) && _wheelTick % 2 == 0)
-		{
-			if (horizontalWheel > 0)
-				horizontalWheel--;
-			else if (horizontalWheel < 0)
-				horizontalWheel++;
-
-			if (verticalWheel > 0)
-				verticalWheel--;
-			else if (verticalWheel < 0)
-				verticalWheel++;
 		}
 	}
 
