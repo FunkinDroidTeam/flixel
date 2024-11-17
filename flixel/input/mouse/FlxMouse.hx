@@ -51,7 +51,7 @@ class FlxMouse extends FlxPointer implements IFlxInputManager
 	 * sits at the right "height". Not used on flash with the native cursor API.
 	 */
 	public var cursorContainer(default, null):Sprite;
-	
+
 	/**
 	 * The current cursor bitmap, if there is one. To set, use the `load` function.
 	 */
@@ -83,19 +83,19 @@ class FlxMouse extends FlxPointer implements IFlxInputManager
 	 * Distance in pixels the mouse has moved since the last frame in the Y direction.
 	 */
 	public var deltaY(get, never):Int;
-	
+
 	/**
 	 * Distance in pixels the mouse has moved in screen space since the last frame in the X direction.
 	 */
 	@:deprecated("deltaScreenX is deprecated, use deltaViewX, instead") // 5.9.0
 	public var deltaScreenX(get, never):Int;
-	
+
 	/**
 	 * Distance in pixels the mouse has moved in screen space since the last frame in the Y direction.
 	 */
 	@:deprecated("deltaScreenY is deprecated, use deltaViewY, instead") // 5.9.0
 	public var deltaScreenY(get, never):Int;
-	
+
 	/**
 	 * Distance in pixels the mouse has moved in view space since the last frame in the X direction.
 	 * @since 5.9.0
@@ -145,7 +145,7 @@ class FlxMouse extends FlxPointer implements IFlxInputManager
 	 * Check to see if the right mouse button has just been pressed.
 	 */
 	public var justPressedRight(get, never):Bool;
-	
+
 	/**
 	 * Check to see if the right mouse button is currently not pressed.
 	 * @since 5.0.0
@@ -604,7 +604,9 @@ class FlxMouse extends FlxPointer implements IFlxInputManager
 	}
 	#end
 
-	inline function get_justMoved():Bool
+	// ???????????///
+
+	function get_justMoved():Bool
 		return _prevX != x || _prevY != y;
 
 	inline function get_deltaX():Int
@@ -615,35 +617,35 @@ class FlxMouse extends FlxPointer implements IFlxInputManager
 
 	inline function get_deltaViewX():Int
 		return viewX - _prevViewX;
-	
+
 	inline function get_deltaViewY():Int
 		return viewY - _prevViewY;
-		
+
 	inline function get__prevScreenX():Int
 		return _prevViewX;
-	
+
 	inline function get__prevScreenY():Int
 		return _prevViewY;
-		
+
 	inline function get_deltaScreenX():Int
 		return deltaViewX;
-	
+
 	inline function get_deltaScreenY():Int
 		return deltaViewY;
 
-	inline function get_pressed():Bool
+	function get_pressed():Bool
 		return _leftButton.pressed;
 
-	inline function get_justPressed():Bool
+	function get_justPressed():Bool
 		return _leftButton.justPressed;
 
-	inline function get_released():Bool
+	function get_released():Bool
 		return _leftButton.released;
 
-	inline function get_justReleased():Bool
+	function get_justReleased():Bool
 		return _leftButton.justReleased;
 
-	inline function get_justPressedTimeInTicks():Int
+	function get_justPressedTimeInTicks():Int
 		return _leftButton.justPressedTimeInTicks;
 
 	#if FLX_MOUSE_ADVANCED
@@ -795,7 +797,7 @@ class FlxMouse extends FlxPointer implements IFlxInputManager
 	{
 		return cursor;
 	}
-	
+
 	inline function set__cursor(value:Bitmap)
 	{
 		return cursor = value;
