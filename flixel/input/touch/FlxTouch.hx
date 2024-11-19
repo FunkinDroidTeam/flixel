@@ -132,11 +132,6 @@ class FlxTouch extends FlxPointer implements IFlxDestroyable implements IFlxInpu
 	 */
 	function update():Void
 	{
-		_prevX = x;
-		_prevY = y;
-		_prevViewX = viewX;
-		_prevViewY = viewY;
-
 		input.update();
 
 		if (justPressed)
@@ -160,6 +155,11 @@ class FlxTouch extends FlxPointer implements IFlxDestroyable implements IFlxInpu
 	 */
 	function setXY(X:Int, Y:Int):Void
 	{
+		_prevX = x;
+		_prevY = y;
+		_prevViewX = viewX;
+		_prevViewY = viewY;
+		
 		flashPoint.setTo(X, Y);
 		flashPoint = FlxG.game.globalToLocal(flashPoint);
 

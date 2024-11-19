@@ -604,8 +604,6 @@ class FlxMouse extends FlxPointer implements IFlxInputManager
 	}
 	#end
 
-	// ???????????///
-
 	function get_justMoved():Bool
 		return _prevX != x || _prevY != y;
 
