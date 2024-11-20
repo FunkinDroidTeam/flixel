@@ -197,6 +197,17 @@ class FlxTouchManager implements IFlxInputManager
 		var touch:FlxTouch = _touchesCache.get(FlashEvent.touchPointID);
 		if (touch != null)
 		{
+			// Compute the velocity if the touch is released (or null)
+			if (touch.released)
+			{
+				// Y
+				final computedVelocityY:Float = FlxVelocity.computeVelocity(velocityY, 0, 100, 0, FlxG.elapsed);
+				velocityY = (_velocityYCap == 1) ? (computedVelocityY > _velocityYCap ? computedVelocityY : 0) : (computedVelocityY < _velocityYCap ? computedVelocityY : 0);
+				
+				// X
+				final computedVelocityX:Float = FlxVelocity.computeVelocity(velocityX, 0, 100, 0, FlxG.elapsed);
+				velocityX = (_velocityXCap == 1) ? (computedVelocityX > _velocityXCap ? computedVelocityX : 0) : (computedVelocityX < _velocityXCap ? computedVelocityX : 0);
+			}
 			touch.setXY(Std.int(FlashEvent.stageX), Std.int(FlashEvent.stageY));
 			touch.pressure = FlashEvent.pressure;
 		}
@@ -274,20 +285,8 @@ class FlxTouchManager implements IFlxInputManager
 	{
 		var i:Int = list.length - 1;
 		var touch:FlxTouch = list[i];
-		
 		// A bit messy.
-		// Compute the velocity if the touch is released (or null)
-		if (touch == null || touch?.released)
-		{
-			// Y
-			final computedVelocityY:Float = FlxVelocity.computeVelocity(velocityY, 0, 100, 0, FlxG.elapsed);
-			velocityY = (_velocityYCap == 1) ? (computedVelocityY > _velocityYCap ? computedVelocityY : 0) : (computedVelocityY < _velocityYCap ? computedVelocityY : 0);
-			
-			// X
-			final computedVelocityX:Float = FlxVelocity.computeVelocity(velocityX, 0, 100, 0, FlxG.elapsed);
-			velocityX = (_velocityXCap == 1) ? (computedVelocityX > _velocityXCap ? computedVelocityX : 0) : (computedVelocityX < _velocityXCap ? computedVelocityX : 0);
-		}
-		else
+		if (touch != null || touch.pressed)
 		{
 			// Calculate the starting velocity if the touch is pre-existing.
 			// The time in seconds.
@@ -311,6 +310,7 @@ class FlxTouchManager implements IFlxInputManager
 			if (Math.abs(touch.deltaX) <= 25)
 				velocityX = 0;
 		}
+
 
 		while (i >= 0)
 		{
