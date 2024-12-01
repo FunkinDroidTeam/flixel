@@ -363,21 +363,29 @@ class SoundFrontEnd
 		showSoundTray(Amount > 0);
 	}
 
-	public function linearToLog(x:Float, minValue:Float = 0.001):Float {
-        // Ensure x is between 0 and 1
-        x = Math.max(0, Math.min(1, x));
+	public function linearToLog(x:Float, minValue:Float = 0.001):Float
+	{
+		// If linear volume is 0, return 0
+		if (x <= 0) return 0;
 
-        // Convert linear scale to logarithmic
-        return Math.exp(Math.log(minValue) * (1 - x));
-    }
+		// Ensure x is between 0 and 1
+		x = Math.min(1, x);
 
-    public function logToLinear(x:Float, minValue:Float = 0.001):Float {
-        // Ensure x is between minValue and 1
-        x = Math.max(minValue, Math.min(1, x));
+		// Convert linear scale to logarithmic
+		return Math.exp(Math.log(minValue) * (1 - x));
+	}
 
-        // Convert logarithmic scale to linear
-        return 1 - (Math.log(x) / Math.log(minValue));
-    }
+	public function logToLinear(x:Float, minValue:Float = 0.001):Float
+	{
+		// If logarithmic volume is 0, return 0
+		if (x <= 0) return 0;
+
+		// Ensure x is between minValue and 1
+		x = Math.min(1, x);
+
+		// Convert logarithmic scale to linear
+		return 1 - (Math.log(Math.max(x, minValue)) / Math.log(minValue));
+	}
 
 	/**
 	 * Shows the sound tray if it is enabled.

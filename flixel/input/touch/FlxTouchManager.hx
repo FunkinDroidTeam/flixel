@@ -30,12 +30,12 @@ class FlxTouchManager implements IFlxInputManager
 	 * A "wheel" variable that acts similarly to FlxMouse's wheel. For vertical swipes.
 	 */
 	public var velocityY(default, null):Float = 0;
-	
+
 	/**
 	 * The helper variable to cap velocityX, we don't want it to keep computing in such tiny numbers.
 	 */
 	var _velocityXCap:Int = 1;
-	
+
 	/**
 	 * The helper variable to cap velocityY, we don't want it to keep computing in such tiny numbers.
 	 */
@@ -243,6 +243,7 @@ class FlxTouchManager implements IFlxInputManager
 		if (touch == null || !touch?.pressed)
 			return;
 
+
 		if (Math.abs(touch.deltaY) <= 15)
 		{
 			velocityY = 0;
@@ -257,7 +258,7 @@ class FlxTouchManager implements IFlxInputManager
 			else
 				_velocityYCap = 1;
 		}
-		
+
 		if (Math.abs(touch.deltaX) <= 15)
 		{
 			velocityX = 0;
@@ -315,12 +316,12 @@ class FlxTouchManager implements IFlxInputManager
 		var i:Int = list.length - 1;
 		var touch:FlxTouch = list[i];
 		// Compute the velocity if the touch is released (or null)
-		if (touch != null || touch?.released)
+		if (touch == null || touch?.released)
 		{
 			// Y
 			final computedVelocityY:Float = FlxVelocity.computeVelocity(velocityY, 0, 100, 0, FlxG.elapsed);
 			velocityY = (_velocityYCap == 1) ? (computedVelocityY > _velocityYCap ? computedVelocityY : 0) : (computedVelocityY < _velocityYCap ? computedVelocityY : 0);
-			
+
 			// X
 			final computedVelocityX:Float = FlxVelocity.computeVelocity(velocityX, 0, 100, 0, FlxG.elapsed);
 			velocityX = (_velocityXCap == 1) ? (computedVelocityX > _velocityXCap ? computedVelocityX : 0) : (computedVelocityX < _velocityXCap ? computedVelocityX : 0);
