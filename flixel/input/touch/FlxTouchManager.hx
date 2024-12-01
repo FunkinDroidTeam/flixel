@@ -242,34 +242,36 @@ class FlxTouchManager implements IFlxInputManager
 	{
 		if (touch == null || !touch?.pressed)
 			return;
-			
+
 		if (Math.abs(touch.deltaY) <= 15)
 		{
 			velocityY = 0;
-			return;
+		}
+		else
+		{
+			final _deltaTime:Float = touch.ticksDeltaSincePress / 1000;
+			velocityY = (touch.deltaY / _deltaTime) * 0.4; //
+			velocityY = FlxMath.clamp(velocityY, -75, 75); //
+			if (velocityY < 0)
+				_velocityYCap = -1;
+			else
+				_velocityYCap = 1;
 		}
 		
 		if (Math.abs(touch.deltaX) <= 15)
 		{
 			velocityX = 0;
-			return;
 		}
-		
-		// A bit messy.
-		// The time in seconds.
-		final _deltaTime:Float = touch.ticksDeltaSincePress / 1000;
-		
-		// Y
-		velocityY = touch.deltaY / _deltaTime;
-		_velocityYCap = (velocityY < -1) ? -1 : 1;
-		
-		velocityY = FlxMath.clamp(velocityY, -100, 100);
-		
-		// X
-		velocityX = touch.deltaX / _deltaTime;
-		_velocityXCap = (velocityX < -1) ? -1 : 1;
-		
-		velocityX = FlxMath.clamp(velocityX, -100, 100);
+		else
+		{
+			final _deltaTime:Float = touch.ticksDeltaSincePress / 1000;
+			velocityX = (touch.deltaX / _deltaTime) * 0.4; //
+			velocityX = FlxMath.clamp(velocityX, -75, 75); //
+			if (velocityX < 0)
+				_velocityXCap = -1;
+			else
+				_velocityXCap = 1;
+		}
 	}
 
 	/**
