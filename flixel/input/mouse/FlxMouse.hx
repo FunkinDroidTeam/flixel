@@ -13,10 +13,10 @@ import flixel.FlxG;
 import flixel.input.IFlxInputManager;
 import flixel.input.FlxInput.FlxInputState;
 import flixel.input.mouse.FlxMouseButton.FlxMouseButtonID;
+import flixel.math.FlxMath;
+import flixel.math.FlxPoint;
 import flixel.system.FlxAssets;
 import flixel.system.replay.MouseRecord;
-import flixel.math.FlxVelocity;
-import flixel.math.FlxMath;
 import flixel.util.FlxDestroyUtil;
 #if FLX_NATIVE_CURSOR
 import openfl.Vector;
@@ -41,28 +41,6 @@ class FlxMouse extends FlxPointer implements IFlxInputManager
 	 * @since 4.1.0
 	 */
 	public var enabled:Bool = true;
-
-	/**
-	 * A "wheel" variable that acts similarly to FlxMouse's wheel. For horizontal swipes.
-	 */
-	public var velocityX(default, null):Float = 0;
-	
-	/**
-	 * A "wheel" variable that acts similarly to FlxMouse's wheel. For vertical swipes.
-	 */
-	public var velocityY(default, null):Float = 0;
-	
-	/**
-	 * The helper variable to cap velocityX, we don't want it to keep computing in such tiny numbers.
-	 */
-	var _velocityXCap:Int = 1;
-	
-	/**
-	 * The helper variable to cap velocityY, we don't want it to keep computing in such tiny numbers.
-	 */
-	var _velocityYCap:Int = 1;
-	
-	public var ticksDeltaSincePress(get, never):Int;
 
 	/**
 	 * Current "delta" value of mouse wheel. If the wheel was just scrolled up,
@@ -158,6 +136,21 @@ class FlxMouse extends FlxPointer implements IFlxInputManager
 	 * @since 4.3.0
 	 */
 	public var justPressedTimeInTicks(get, never):Int;
+
+	/**
+	 * Time in ticks that had passed since of last press
+	 */
+	public var ticksDeltaSincePress(get, never):Int;
+	
+	/**
+	 * The speed of this mouse, always updates.
+	 */
+	public var velocity(default, null):FlxPoint = FlxPoint.get();
+	
+	/**
+	 * The FlxFlick class responsible for managing flicks.
+	 */
+	public var flickManager(default, null):FlxFlick = new FlxFlick();
 
 	#if FLX_MOUSE_ADVANCED
 	/**
@@ -477,6 +470,7 @@ class FlxMouse extends FlxPointer implements IFlxInputManager
 
 		_cursorBitmapData = FlxDestroyUtil.dispose(_cursorBitmapData);
 		FlxG.signals.postGameStart.remove(onGameStart);
+		velocity = FlxDestroyUtil.put(velocity);
 	}
 
 	/**
@@ -527,46 +521,6 @@ class FlxMouse extends FlxPointer implements IFlxInputManager
 		Mouse.hide();
 	}
 
-	// TODO: Make this function more flexible and customizable.
-	function calculateVelocity(touch:FlxMouse):Void
-	{
-		if (touch == null || !touch?.pressed)
-			return;
-			
-		// Ignore small movements to prevent jitter
-		if (Math.abs(touch.deltaY) <= 15)
-		{
-			velocityY = 0;
-		}
-		else
-		{
-			// Calculate Y velocity with damping
-			final _deltaTime:Float = touch.ticksDeltaSincePress / 1000;
-			velocityY = (touch.deltaY / _deltaTime) * 0.4; // Dampen velocity
-			velocityY = FlxMath.clamp(velocityY, -75, 75); // Adjust max velocity for smoother feel
-			if (velocityY < 0)
-				_velocityYCap = -1;
-			else
-				_velocityYCap = 1;
-		}
-		
-		if (Math.abs(touch.deltaX) <= 15)
-		{
-			velocityX = 0;
-		}
-		else
-		{
-			// Calculate X velocity with damping
-			final _deltaTime:Float = touch.ticksDeltaSincePress / 1000;
-			velocityX = (touch.deltaX / _deltaTime) * 0.4; // Dampen velocity
-			velocityX = FlxMath.clamp(velocityX, -75, 75); // Adjust max velocity for smoother feel
-			if (velocityX < 0)
-				_velocityXCap = -1;
-			else
-				_velocityXCap = 1;
-		}
-	}
-
 
 	/**
 	 * Called by the internal game loop to update the mouse pointer's position in the game world.
@@ -574,19 +528,7 @@ class FlxMouse extends FlxPointer implements IFlxInputManager
 	 */
 	function update():Void
 	{
-		calculateVelocity(this);
-		// Compute the velocity if the touch is released (or null)
-		if (released)
-		{
-			// Y
-			final computedVelocityY:Float = FlxVelocity.computeVelocity(velocityY, 0, 100, 0, FlxG.elapsed);
-			velocityY = (_velocityYCap == 1) ? (computedVelocityY > _velocityYCap ? computedVelocityY : 0) : (computedVelocityY < _velocityYCap ? computedVelocityY : 0);
-			
-			// X
-			final computedVelocityX:Float = FlxVelocity.computeVelocity(velocityX, 0, 100, 0, FlxG.elapsed);
-			velocityX = (_velocityXCap == 1) ? (computedVelocityX > _velocityXCap ? computedVelocityX : 0) : (computedVelocityX < _velocityXCap ? computedVelocityX : 0);
-		}
-
+		calculateVelocity();
 		_prevX = x;
 		_prevY = y;
 		_prevViewX = viewX;
@@ -618,6 +560,22 @@ class FlxMouse extends FlxPointer implements IFlxInputManager
 			wheel = 0;
 		}
 		_wheelUsed = false;
+		if (justReleased)
+			flickManager.initFlick(velocity);
+			
+		if (!pressed)
+			flickManager.update(FlxG.elapsed);
+	}
+	
+	function calculateVelocity():Void
+	{
+		if (!pressed)
+			return;
+			
+		var _deltaTime:Float = ticksDeltaSincePress / 1000;
+		
+		velocity.y = (deltaY != 0) ? FlxMath.roundDecimal(deltaY / _deltaTime, 3) : 0;
+		velocity.x = (deltaY != 0) ? FlxMath.roundDecimal((deltaX != 0) ? deltaX : 1 / _deltaTime, 3) : 0;
 	}
 
 	/**
