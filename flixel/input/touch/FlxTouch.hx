@@ -7,6 +7,7 @@ import flixel.input.FlxInput;
 import flixel.input.FlxSwipe;
 import flixel.input.IFlxInput;
 import flixel.math.FlxPoint;
+import flixel.math.FlxMath;
 import flixel.util.FlxDestroyUtil;
 
 /**
@@ -37,10 +38,12 @@ class FlxTouch extends FlxPointer implements IFlxDestroyable implements IFlxInpu
 	 * Check to see if this touch is currently pressed.
 	 */
 	public var pressed(get, never):Bool;
+
 	/**
 	 * Check to see if this touch has just been pressed.
 	 */
 	public var justPressed(get, never):Bool;
+
 	/**
 	 * Check to see if this touch is currently not pressed.
 	 */
@@ -60,6 +63,7 @@ class FlxTouch extends FlxPointer implements IFlxDestroyable implements IFlxInpu
 	 * Distance in pixels this touch has moved since the last frame in the X direction.
 	 */
 	public var deltaX(get, default):Float;
+
 	/**
 	 * Distance in pixels this touch has moved since the last frame in the Y direction.
 	 */
@@ -69,6 +73,7 @@ class FlxTouch extends FlxPointer implements IFlxDestroyable implements IFlxInpu
 	 * Distance in pixels this touch has moved in view space since the last frame in the X direction.
 	 */
 	public var deltaViewX(get, default):Float;
+
 	/**
 	 * Distance in pixels this touch has moved in view space since the last frame in the Y direction.
 	 */
@@ -78,10 +83,16 @@ class FlxTouch extends FlxPointer implements IFlxDestroyable implements IFlxInpu
 	 * The position of the touch when it was just pressed in FlxPoint.
 	 */
 	public var justPressedPosition(default, null) = FlxPoint.get();
+
 	/**
 	 * Time in ticks that had passed since of last press
 	 */
 	public var ticksDeltaSincePress(get, default):Int;
+
+	/**
+	 * The speed of this touch, always updates.
+	 */
+	public var velocity(default, null):FlxPoint = FlxPoint.get();
 
 	/**
 	 * Helper variables
@@ -98,6 +109,7 @@ class FlxTouch extends FlxPointer implements IFlxDestroyable implements IFlxInpu
 	{
 		input = null;
 		justPressedPosition = FlxDestroyUtil.put(justPressedPosition);
+		velocity = FlxDestroyUtil.put(velocity);
 		flashPoint = null;
 	}
 
@@ -155,6 +167,8 @@ class FlxTouch extends FlxPointer implements IFlxDestroyable implements IFlxInpu
 	 */
 	function setXY(X:Int, Y:Int):Void
 	{
+		calculateVelocity();
+
 		_prevX = x;
 		_prevY = y;
 		_prevViewX = viewX;
@@ -164,6 +178,17 @@ class FlxTouch extends FlxPointer implements IFlxDestroyable implements IFlxInpu
 		flashPoint = FlxG.game.globalToLocal(flashPoint);
 
 		setRawPositionUnsafe(flashPoint.x, flashPoint.y);
+	}
+
+	function calculateVelocity():Void
+	{
+		if (!pressed)
+			return;
+			
+		var _deltaTime:Float = ticksDeltaSincePress / 1000;
+		
+		velocity.y = (deltaY != 0) ? FlxMath.roundDecimal(deltaY / _deltaTime, 3) : 0;
+		velocity.x = (deltaY != 0) ? FlxMath.roundDecimal((deltaX != 0) ? deltaX : 1 / _deltaTime, 3) : 0;
 	}
 
 	inline function get_touchPointID():Int
