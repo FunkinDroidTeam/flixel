@@ -33,17 +33,17 @@ class FlxTouch extends FlxPointer implements IFlxDestroyable implements IFlxInpu
 	 * Check to see if this touch has just been moved upwards.
 	 */
 	public var justMovedUp(get, never):Bool;
-	
+
 	/**
 	 * Check to see if this touch has just been moved downwards.
 	 */
 	public var justMovedDown(get, never):Bool;
-	
+
 	/**
 	 * Check to see if this touch has just been moved leftwards.
 	 */
 	public var justMovedLeft(get, never):Bool;
-	
+
 	/**
 	 * Check to see if this touch has just been moved rightwards.
 	 */
@@ -68,7 +68,7 @@ class FlxTouch extends FlxPointer implements IFlxDestroyable implements IFlxInpu
 	 * Check to see if this touch is currently not pressed.
 	 */
 	public var released(get, never):Bool;
-	
+
 	/**
 	 * Check to see if this touch has just been released.
 	 */
@@ -118,7 +118,7 @@ class FlxTouch extends FlxPointer implements IFlxDestroyable implements IFlxInpu
 	 * Helper variables
 	 */
 	var input:FlxInput<Int>;
-	
+
 	var flashPoint = new Point();
 
 	var _prevX:Float = 0;
@@ -129,9 +129,9 @@ class FlxTouch extends FlxPointer implements IFlxDestroyable implements IFlxInpu
 
 	var _startX:Float = 0;
 	var _startY:Float = 0;
-	
-	var _swipeDeltaX:Float = 0;
-	var _swipeDeltaY:Float = 0;
+
+	var _swipeDeltaX(get, never):Float;
+	var _swipeDeltaY(get, never):Float;
 
 	public function destroy():Void
 	{
@@ -182,9 +182,14 @@ class FlxTouch extends FlxPointer implements IFlxDestroyable implements IFlxInpu
 			_startY = viewY;
 		}
 		#if FLX_POINTER_INPUT
-		else if (justReleased)
+		if (justReleased)
 		{
+			FlxG.touches.flickManager.initFlick(touchPointID, velocity);
 			FlxG.swipes.push(new FlxSwipe(touchPointID, justPressedPosition.copyTo(), getViewPosition(), justPressedTimeInTicks));
+		}
+		if (pressed)
+		{
+			FlxG.touches.flickManager.destroy();
 		}
 		#end
 
@@ -204,7 +209,7 @@ class FlxTouch extends FlxPointer implements IFlxDestroyable implements IFlxInpu
 		_prevY = y;
 		_prevViewX = viewX;
 		_prevViewY = viewY;
-		
+
 		flashPoint.setTo(X, Y);
 		flashPoint = FlxG.game.globalToLocal(flashPoint);
 
@@ -218,9 +223,9 @@ class FlxTouch extends FlxPointer implements IFlxDestroyable implements IFlxInpu
 	{
 		if (!pressed)
 			return;
-			
+
 		var _deltaTime:Float = ticksDeltaSincePress / 1000;
-		
+
 		velocity.y = (deltaY != 0) ? FlxMath.roundDecimal(deltaY / _deltaTime, 3) : 0;
 		velocity.x = (deltaY != 0) ? FlxMath.roundDecimal((deltaX != 0) ? deltaX : 1 / _deltaTime, 3) : 0;
 	}
@@ -257,7 +262,7 @@ class FlxTouch extends FlxPointer implements IFlxDestroyable implements IFlxInpu
 			_startY = viewY;
 		return swiped;
 	}
-	
+
 	@:noCompletion
 	inline function get_justMovedDown():Bool
 	{
@@ -266,7 +271,7 @@ class FlxTouch extends FlxPointer implements IFlxDestroyable implements IFlxInpu
 			_startY = viewY;
 		return swiped;
 	}
-	
+
 	@:noCompletion
 	inline function get_justMovedLeft():Bool
 	{
@@ -275,7 +280,7 @@ class FlxTouch extends FlxPointer implements IFlxDestroyable implements IFlxInpu
 			_startX = viewX;
 		return swiped;
 	}
-	
+
 	@:noCompletion
 	inline function get_justMovedRight():Bool
 	{
@@ -284,7 +289,7 @@ class FlxTouch extends FlxPointer implements IFlxDestroyable implements IFlxInpu
 			_startX = viewX;
 		return swiped;
 	}
-	
+
 	@:noCompletion
 	inline function get_deltaX():Float
 		return x - _prevX;
@@ -304,11 +309,11 @@ class FlxTouch extends FlxPointer implements IFlxDestroyable implements IFlxInpu
 	@:noCompletion
 	inline function get__swipeDeltaX():Float
 		return viewX - _startX;
-		
+
 	@:noCompletion
-	inline function get___swipeDeltaY():Float
+	inline function get__swipeDeltaY():Float
 		return viewY - _startY;
-		
+
 	@:noCompletion
 	inline function get_ticksDeltaSincePress():Int
 		return FlxG.game.ticks - justPressedTimeInTicks;
