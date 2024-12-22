@@ -15,9 +15,9 @@ import flixel.util.FlxStringUtil;
 @:allow(flixel.input.touch.FlxTouchManager)
 class FlxFlick implements IFlxDestroyable
 {
-    /**
+	/**
 	 * The threshold distance that needs to be surpassed for a flick to be returned as true.
-     * Can be set globally.
+	 * Can be set globally.
 	 */
 	public static var flickThreshold:FlxPoint;
 
@@ -27,7 +27,7 @@ class FlxFlick implements IFlxDestroyable
 	 */
 	public var ID(default, null):Int;
 
-    /**
+	/**
 	 * Whether the flick has been instanced or not.
 	 */
 	public var initialized:Bool = false;
@@ -48,23 +48,22 @@ class FlxFlick implements IFlxDestroyable
 	 */
 	public var flickUp(get, default):Bool;
 
-    /**
+	/**
 	 * Whether a flick downwards has been passed or not.
 	 */
 	public var flickDown(get, default):Bool;
 
-    /**
+	/**
 	 * Indicates when a flick leftwards has been passed or not.
 	 */
 	public var flickLeft(get, default):Bool;
 
-    /**
+	/**
 	 * Indicates when a flick rightwards has been passed or not.
 	 */
 	public var flickRight(get, default):Bool;
-    
 
-    // Helper variables for proper flick check so it helps performance to avoid handling the checks everytime you get the public check.
+	// Helper variables for proper flick check so it helps performance to avoid handling the checks everytime you get the public check.
 
 	/**
 	 * Helper variable for proper flickUp checks.
@@ -94,7 +93,9 @@ class FlxFlick implements IFlxDestroyable
 	function new()
 	{
 		if (flickThreshold == null)
-            flickThreshold = FlxPoint.get(100, 100);
+		{
+			flickThreshold = FlxPoint.get(100, 100);
+		}
 	}
 
 	/**
@@ -107,27 +108,36 @@ class FlxFlick implements IFlxDestroyable
 	public function initFlick(?ID:Int = -1, StartingVelocity:FlxPoint, ?Drag:FlxPoint):Void
 	{
 		if (initialized)
+		{
 			return;
+		}
 
 		this.ID = ID;
 		velocity = StartingVelocity.clone();
+		drag = (Drag != null) ? Drag.clone() : FlxPoint.get(700, 700);
+		_currentDistance = FlxPoint.get();
+
 		#if FLX_TOUCH
 		for (touch in FlxG.touches.list)
 		{
 			if (touch == null || touch.touchPointID != ID)
+			{
 				continue;
-				
+			}
+
 			if (Math.abs(touch.deltaX) >= 25)
+			{
 				velocity.x = 0;
-				
+			}
+
 			if (Math.abs(touch.deltaY) >= 25)
+			{
 				velocity.y = 0;
+			}
 			break;
 		}
 		#end
-		
-		drag = (Drag != null) ? Drag.clone() : FlxPoint.get(700, 700);
-		_currentDistance = FlxPoint.get();
+
 		initialized = true;
 	}
 
@@ -137,9 +147,12 @@ class FlxFlick implements IFlxDestroyable
 	 */
 	public function update(elapsed:Float) {
 		if (!initialized)
+		{
 			return;
+		}
 
-		if (Math.abs(velocity.x) + Math.abs(velocity.y) <= 10) {
+		if (Math.abs(velocity.x) + Math.abs(velocity.y) <= 10)
+		{
 			destroy();
 			return;
 		}
@@ -149,17 +162,24 @@ class FlxFlick implements IFlxDestroyable
 		if (Math.abs(_currentDistance.x) > flickThreshold.x)
 		{
 			if (_currentDistance.x > 0)
+			{
 				_flickLeft = true;
+			}
 			else
+			{
 				_flickRight = true;
+			}
 			_currentDistance.x = 0;
 		}
 
 		if (Math.abs(_currentDistance.y) > flickThreshold.y)
 		{
-			if (_currentDistance.y > 0) {
+			if (_currentDistance.y > 0)
+			{
 				_flickDown = true;
-			} else {
+			}
+			else
+			{
 				_flickUp = true;
 			}
 			_currentDistance.y = 0;
@@ -174,22 +194,23 @@ class FlxFlick implements IFlxDestroyable
 	@:noCompletion
 	function updateMotion(elapsed:Float):Void
 	{
-		if (Math.abs(velocity.x) + Math.abs(velocity.y) <= 10) {
-            destroy();
+		if (Math.abs(velocity.x) + Math.abs(velocity.y) <= 10)
+		{
+			destroy();
 			return;
-        }
+		}
 
-        var framerateAmp = 60 / FlxG.updateFramerate;
+		var framerateAmp = 60 / FlxG.updateFramerate;
 
-        var newVelocity = FlxVelocity.computeVelocity(velocity.x, 0, drag.x, 0, elapsed);
-        var avgVelocity = 0.5 * (velocity.x + newVelocity);
-        velocity.x = newVelocity;
-        _currentDistance.x += (avgVelocity * elapsed) / framerateAmp;
+		var newVelocity = FlxVelocity.computeVelocity(velocity.x, 0, drag.x, 0, elapsed);
+		var avgVelocity = 0.5 * (velocity.x + newVelocity);
+		velocity.x = newVelocity;
+		_currentDistance.x += (avgVelocity * elapsed) / framerateAmp;
 
-        newVelocity = FlxVelocity.computeVelocity(velocity.y, 0, drag.y, 0, elapsed);
-        avgVelocity = 0.5 * (velocity.y + newVelocity);
-        velocity.y = newVelocity;
-        _currentDistance.y += (avgVelocity * elapsed) / framerateAmp;
+		newVelocity = FlxVelocity.computeVelocity(velocity.y, 0, drag.y, 0, elapsed);
+		avgVelocity = 0.5 * (velocity.y + newVelocity);
+		velocity.y = newVelocity;
+		_currentDistance.y += (avgVelocity * elapsed) / framerateAmp;
 	}
 
 	/**
@@ -204,7 +225,7 @@ class FlxFlick implements IFlxDestroyable
 		initialized = false;
 	}
 
-    @:noCompletion
+	@:noCompletion
 	inline function toString():String
 	{
 		return FlxStringUtil.getDebugString([
@@ -216,39 +237,43 @@ class FlxFlick implements IFlxDestroyable
 		]);
 	}
 
-    @:noCompletion
+	@:noCompletion
 	function get_flickUp():Bool {
-		if (_flickUp) {
+		if (_flickUp)
+		{
 			_flickUp = false;
 			return true;
 		}
 		return false;
 	}
 
-    @:noCompletion
+	@:noCompletion
 	function get_flickDown():Bool {
-		if (_flickDown) {
+		if (_flickDown)
+		{
 			_flickDown = false;
 			return true;
 		}
 		return false;
 	}
 
-    @:noCompletion
+	@:noCompletion
 	function get_flickLeft():Bool {
-		if (_flickLeft) {
-            _flickLeft = false;
-            return true;
-        }
+		if (_flickLeft)
+		{
+			_flickLeft = false;
+			return true;
+		}
 		return false;
 	}
 
-    @:noCompletion
+	@:noCompletion
 	function get_flickRight():Bool {
-		if (_flickRight) {
-            _flickRight = false;
-            return true;
-        }
+		if (_flickRight)
+		{
+			_flickRight = false;
+			return true;
+		}
 		return false;
 	}
 }
