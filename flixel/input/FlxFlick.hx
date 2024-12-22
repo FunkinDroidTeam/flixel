@@ -6,11 +6,13 @@ import flixel.math.FlxVelocity;
 import flixel.util.FlxDestroyUtil;
 import flixel.util.FlxStringUtil;
 
-@:allow(flixel.input.mouse.FlxMouse)
-@:allow(flixel.input.touch.FlxTouchManager)
 /**
  * @author moondroidcoder
+ * The flick management class used in FlxMouse and FlxTouchManager.
+ * It handles all the flick motion, speed calculation, etc.
  */
+@:allow(flixel.input.mouse.FlxMouse)
+@:allow(flixel.input.touch.FlxTouchManager)
 class FlxFlick implements IFlxDestroyable
 {
     /**
@@ -105,8 +107,8 @@ class FlxFlick implements IFlxDestroyable
 	public function initFlick(?ID:Int = -1, StartingVelocity:FlxPoint, ?Drag:FlxPoint) {
 		this.ID = ID;
 		velocity = StartingVelocity.clone();
-		drag = Drag.clone() ?? FlxPoint.get(700, 700);
-		_currentDistance = FlxPoint.get(0, 0);
+		drag = (drag != null) ? Drag.clone() : FlxPoint.get(700, 700);
+		_currentDistance = FlxPoint.get();
 		initialized = true;
 	}
 
