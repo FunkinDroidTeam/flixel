@@ -300,6 +300,7 @@ class FlxTouch extends FlxPointer implements IFlxDestroyable implements IFlxInpu
 	@:noCompletion
 	inline function get_deltaViewY():Float
 		return viewY - _prevViewY;
+
 	@:noCompletion
 	inline function get__swipeDeltaX():Float
 		return viewX - _startX;

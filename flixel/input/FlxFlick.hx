@@ -104,9 +104,26 @@ class FlxFlick implements IFlxDestroyable
 	 * @param StartingVelocity The starting velocity of the input.
 	 * @param Drag How much drag for the velocity check, default is 700 pixels for both axes.
 	 */
-	public function initFlick(?ID:Int = -1, StartingVelocity:FlxPoint, ?Drag:FlxPoint) {
+	public function initFlick(?ID:Int = -1, StartingVelocity:FlxPoint, ?Drag:FlxPoint):Void
+	{
+		if (initialized)
+			return;
+
 		this.ID = ID;
 		velocity = StartingVelocity.clone();
+		for (touch in FlxG.touches.list)
+		{
+			if (touch == null || touch.touchPointID != ID)
+				continue;
+				
+			if (Math.abs(touch.deltaX) >= 25)
+				velocity.x = 0;
+				
+			if (Math.abs(touch.deltaY) >= 25)
+				velocity.y = 0;
+			break;
+		}
+		
 		drag = (Drag != null) ? Drag.clone() : FlxPoint.get(700, 700);
 		_currentDistance = FlxPoint.get();
 		initialized = true;
