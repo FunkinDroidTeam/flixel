@@ -111,6 +111,7 @@ class FlxFlick implements IFlxDestroyable
 
 		this.ID = ID;
 		velocity = StartingVelocity.clone();
+		#if FLX_TOUCH
 		for (touch in FlxG.touches.list)
 		{
 			if (touch == null || touch.touchPointID != ID)
@@ -123,6 +124,7 @@ class FlxFlick implements IFlxDestroyable
 				velocity.y = 0;
 			break;
 		}
+		#end
 		
 		drag = (Drag != null) ? Drag.clone() : FlxPoint.get(700, 700);
 		_currentDistance = FlxPoint.get();
