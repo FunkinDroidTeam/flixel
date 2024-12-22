@@ -159,9 +159,16 @@ class FlxFlick implements IFlxDestroyable
 
 		updateMotion(elapsed);
 
+		var modifiedDistance = _currentDistance.x;
+
 		if (Math.abs(_currentDistance.x) > flickThreshold.x)
 		{
-			if (_currentDistance.x > 0)
+			#if FLX_TOUCH
+			if (FlxG.touches.invertX)
+				modifiedDistance = -_currentDistance.x;
+			#end
+			
+			if (modifiedDistance < 0)
 			{
 				_flickLeft = true;
 			}
@@ -172,9 +179,16 @@ class FlxFlick implements IFlxDestroyable
 			_currentDistance.x = 0;
 		}
 
+		modifiedDistance = _currentDistance.y;
+
 		if (Math.abs(_currentDistance.y) > flickThreshold.y)
 		{
-			if (_currentDistance.y > 0)
+			#if FLX_TOUCH
+			if (FlxG.touches.invertY)
+				modifiedDistance = -_currentDistance.y;
+			#end
+			
+			if (modifiedDistance < 0)
 			{
 				_flickDown = true;
 			}

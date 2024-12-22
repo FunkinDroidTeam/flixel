@@ -30,6 +30,18 @@ class FlxTouchManager implements IFlxInputManager
 	#end
 
 	/**
+	 * Inverts movement checks for the X axis.
+	 * On by default.
+	 */
+	public var invertX:Bool = true;
+	
+	/**
+	 * Inverts movement checks for the Y axis.
+	 * On by default.
+	 */
+	public var invertY:Bool = true;
+
+	/**
 	 * The threshold to surpass for a movement check to be returned as true.
 	 */
 	public var swipeThreshold:FlxPoint = FlxPoint.get(100, 100);
@@ -169,6 +181,9 @@ class FlxTouchManager implements IFlxInputManager
 		}
 
 		list.splice(0, list.length);
+		#if FLX_POINTER_INPUT
+		flickManager.destroy();
+		#end
 	}
 
 	@:allow(flixel.FlxG)
