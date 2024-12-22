@@ -107,7 +107,7 @@ class FlxFlick implements IFlxDestroyable
 	public function initFlick(?ID:Int = -1, StartingVelocity:FlxPoint, ?Drag:FlxPoint) {
 		this.ID = ID;
 		velocity = StartingVelocity.clone();
-		drag = (drag != null) ? Drag.clone() : FlxPoint.get(700, 700);
+		drag = (Drag != null) ? Drag.clone() : FlxPoint.get(700, 700);
 		_currentDistance = FlxPoint.get();
 		initialized = true;
 	}
