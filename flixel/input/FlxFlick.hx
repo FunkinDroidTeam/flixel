@@ -125,12 +125,12 @@ class FlxFlick implements IFlxDestroyable
 				continue;
 			}
 
-			if (Math.abs(touch.deltaX) >= 25)
+			if (Math.abs(touch.deltaX) <= 25)
 			{
 				velocity.x = 0;
 			}
 
-			if (Math.abs(touch.deltaY) >= 25)
+			if (Math.abs(touch.deltaY) <= 25)
 			{
 				velocity.y = 0;
 			}
