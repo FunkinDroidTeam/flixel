@@ -6,6 +6,7 @@ import openfl.events.TouchEvent;
 import openfl.ui.Multitouch;
 import openfl.ui.MultitouchInputMode;
 import flixel.input.FlxFlick;
+import flixel.math.FlxPoint;
 /**
  * @author Zaphod
  */
@@ -25,6 +26,11 @@ class FlxTouchManager implements IFlxInputManager
 	 * The FlxFlick class responsible for managing flicks.
 	 */
 	public var flickManager:FlxFlick = new FlxFlick();
+
+	/**
+	 * The threshold to surpass for a movement check to be returned as true.
+	 */
+	public var swipeThreshold:FlxPoint = FlxPoint.get(100, 100);
 
 	/**
 	 * Storage for inactive touches (some sort of cache for them).
