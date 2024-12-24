@@ -7,6 +7,7 @@ import flixel.input.FlxInput;
 import flixel.input.FlxSwipe;
 import flixel.input.IFlxInput;
 import flixel.math.FlxPoint;
+import flixel.math.FlxMath;
 import flixel.util.FlxDestroyUtil;
 
 /**
@@ -29,23 +30,45 @@ class FlxTouch extends FlxPointer implements IFlxDestroyable implements IFlxInpu
 	public var pressure(default, null):Float;
 
 	/**
+	 * Check to see if this touch has just been moved upwards.
+	 */
+	public var justMovedUp(get, never):Bool;
+
+	/**
+	 * Check to see if this touch has just been moved downwards.
+	 */
+	public var justMovedDown(get, never):Bool;
+
+	/**
+	 * Check to see if this touch has just been moved leftwards.
+	 */
+	public var justMovedLeft(get, never):Bool;
+
+	/**
+	 * Check to see if this touch has just been moved rightwards.
+	 */
+	public var justMovedRight(get, never):Bool;
+
+	/**
 	 * Check to see if this touch has just been moved.
 	 */
 	public var justMoved(get, never):Bool;
-	
+
 	/**
 	 * Check to see if this touch is currently pressed.
 	 */
 	public var pressed(get, never):Bool;
+
 	/**
 	 * Check to see if this touch has just been pressed.
 	 */
 	public var justPressed(get, never):Bool;
+
 	/**
 	 * Check to see if this touch is currently not pressed.
 	 */
 	public var released(get, never):Bool;
-	
+
 	/**
 	 * Check to see if this touch has just been released.
 	 */
@@ -60,6 +83,7 @@ class FlxTouch extends FlxPointer implements IFlxDestroyable implements IFlxInpu
 	 * Distance in pixels this touch has moved since the last frame in the X direction.
 	 */
 	public var deltaX(get, default):Float;
+
 	/**
 	 * Distance in pixels this touch has moved since the last frame in the Y direction.
 	 */
@@ -69,6 +93,7 @@ class FlxTouch extends FlxPointer implements IFlxDestroyable implements IFlxInpu
 	 * Distance in pixels this touch has moved in view space since the last frame in the X direction.
 	 */
 	public var deltaViewX(get, default):Float;
+
 	/**
 	 * Distance in pixels this touch has moved in view space since the last frame in the Y direction.
 	 */
@@ -78,26 +103,41 @@ class FlxTouch extends FlxPointer implements IFlxDestroyable implements IFlxInpu
 	 * The position of the touch when it was just pressed in FlxPoint.
 	 */
 	public var justPressedPosition(default, null) = FlxPoint.get();
+
 	/**
 	 * Time in ticks that had passed since of last press
 	 */
 	public var ticksDeltaSincePress(get, default):Int;
 
 	/**
+	 * The speed of this touch, always updates.
+	 */
+	public var velocity(default, null):FlxPoint = FlxPoint.get();
+
+	/**
 	 * Helper variables
 	 */
 	var input:FlxInput<Int>;
-	
+
 	var flashPoint = new Point();
+
 	var _prevX:Float = 0;
 	var _prevY:Float = 0;
+
 	var _prevViewX:Float = 0;
 	var _prevViewY:Float = 0;
+
+	var _startX:Float = 0;
+	var _startY:Float = 0;
+
+	var _swipeDeltaX(get, never):Float;
+	var _swipeDeltaY(get, never):Float;
 
 	public function destroy():Void
 	{
 		input = null;
 		justPressedPosition = FlxDestroyUtil.put(justPressedPosition);
+		velocity = FlxDestroyUtil.put(velocity);
 		flashPoint = null;
 	}
 
@@ -138,13 +178,21 @@ class FlxTouch extends FlxPointer implements IFlxDestroyable implements IFlxInpu
 		{
 			justPressedPosition.set(viewX, viewY);
 			justPressedTimeInTicks = FlxG.game.ticks;
+			_startX = viewX;
+			_startY = viewY;
 		}
 		#if FLX_POINTER_INPUT
-		else if (justReleased)
+		if (justReleased)
 		{
+			FlxG.touches.flickManager.initFlick(touchPointID, velocity);
 			FlxG.swipes.push(new FlxSwipe(touchPointID, justPressedPosition.copyTo(), getViewPosition(), justPressedTimeInTicks));
 		}
+		if (pressed)
+		{
+			FlxG.touches.flickManager.destroy();
+		}
 		#end
+
 	}
 
 	/**
@@ -155,46 +203,118 @@ class FlxTouch extends FlxPointer implements IFlxDestroyable implements IFlxInpu
 	 */
 	function setXY(X:Int, Y:Int):Void
 	{
+		calculateVelocity();
+
 		_prevX = x;
 		_prevY = y;
 		_prevViewX = viewX;
 		_prevViewY = viewY;
-		
+
 		flashPoint.setTo(X, Y);
 		flashPoint = FlxG.game.globalToLocal(flashPoint);
 
 		setRawPositionUnsafe(flashPoint.x, flashPoint.y);
 	}
 
+	/**
+	 * Calculates this touch's velocity.
+	 */
+	function calculateVelocity():Void
+	{
+		if (!pressed)
+			return;
+
+		var _deltaTime:Float = ticksDeltaSincePress / 1000;
+
+		velocity.y = (deltaY != 0) ? FlxMath.roundDecimal(deltaY / _deltaTime, 3) : 0;
+		velocity.x = (deltaY != 0) ? FlxMath.roundDecimal((deltaX != 0) ? deltaX : 1 / _deltaTime, 3) : 0;
+	}
+
+	@:noCompletion
 	inline function get_touchPointID():Int
 		return input.ID;
 
+	@:noCompletion
 	inline function get_justReleased():Bool
 		return input.justReleased;
 
+	@:noCompletion
 	inline function get_released():Bool
 		return input.released;
 
+	@:noCompletion
 	inline function get_pressed():Bool
 		return input.pressed;
 
+	@:noCompletion
 	inline function get_justPressed():Bool
 		return input.justPressed;
 
+	@:noCompletion
 	inline function get_justMoved():Bool
 		return x != _prevX || y != _prevY;
 
+	@:noCompletion
+	inline function get_justMovedUp():Bool
+	{
+		var swiped:Bool = _swipeDeltaY > FlxG.touches.swipeThreshold.y;
+		if (swiped)
+			_startY = viewY;
+		return swiped;
+	}
+
+	@:noCompletion
+	inline function get_justMovedDown():Bool
+	{
+		var swiped:Bool = _swipeDeltaY < -FlxG.touches.swipeThreshold.y;
+		if (swiped)
+			_startY = viewY;
+		return swiped;
+	}
+
+	@:noCompletion
+	inline function get_justMovedLeft():Bool
+	{
+		var swiped:Bool = _swipeDeltaX > FlxG.touches.swipeThreshold.x;
+		if (swiped)
+			_startX = viewX;
+		return swiped;
+	}
+
+	@:noCompletion
+	inline function get_justMovedRight():Bool
+	{
+		var swiped:Bool = _swipeDeltaX < -FlxG.touches.swipeThreshold.x;
+		if (swiped)
+			_startX = viewX;
+		return swiped;
+	}
+
+	@:noCompletion
 	inline function get_deltaX():Float
 		return x - _prevX;
 
+	@:noCompletion
 	inline function get_deltaY():Float
 		return y - _prevY;
 
+	@:noCompletion
 	inline function get_deltaViewX():Float
 		return viewX - _prevViewX;
 
+	@:noCompletion
 	inline function get_deltaViewY():Float
 		return viewY - _prevViewY;
+
+	@:noCompletion
+	inline function get__swipeDeltaX():Float
+		return viewX - _startX;
+
+	@:noCompletion
+	inline function get__swipeDeltaY():Float
+		return viewY - _startY;
+
+	@:noCompletion
 	inline function get_ticksDeltaSincePress():Int
 		return FlxG.game.ticks - justPressedTimeInTicks;
 }

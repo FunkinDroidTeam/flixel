@@ -14,7 +14,7 @@ import flixel.input.touch.FlxTouch;
 /**
  * A set of functions related to angle calculations.
  * In degrees: (down = 90, right = 0, up = -90)
- * 
+ *
  * Note: in Flixel 5.0.0 all angle-related tools were changed so that 0 degrees points right, instead of up
  * @see [Flixel 5.0.0 Migration guide](https://github.com/HaxeFlixel/flixel/wiki/Flixel-5.0.0-Migration-guide)
  */
@@ -203,6 +203,25 @@ class FlxAngle
 	}
 
 	/**
+	 * Find the angle between two FlxPoints.
+	 *
+	 * @param	PointA		The FlxPoint to test from
+	 * @param	PointB		The FlxPoint to angle PointA towards
+	 * @param	AsDegrees	If you need the value in degrees instead of radians, set to true
+	 * @return	The angle (in radians unless AsDegrees is true)
+	 */
+	public static function angleBetweenPoints(PointA:FlxPoint, PointB:FlxPoint, AsDegrees:Bool = false):Float
+	{
+		var dx:Float = PointB.x - PointA.x;
+		var dy:Float = PointB.y - PointA.y;
+
+		PointA.putWeak();
+		PointB.putWeak();
+
+		return angleFromOrigin(dx, dy, AsDegrees);
+	}
+
+	/**
 	 * Find the angle (in degrees) between an FlxSprite and an FlxPoint.
 	 * The source sprite takes its x/y and origin into account.
 	 * @since 5.0.0
@@ -332,7 +351,7 @@ class FlxAngle
 		return angleBetweenTouch(Object, Touch, false);
 	}
 	#end
-	
+
 	static inline function get_TO_DEG():Float
 	{
 		return 180 / Math.PI;
