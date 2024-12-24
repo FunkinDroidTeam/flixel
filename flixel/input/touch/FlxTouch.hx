@@ -257,7 +257,7 @@ class FlxTouch extends FlxPointer implements IFlxDestroyable implements IFlxInpu
 	@:noCompletion
 	inline function get_justMovedUp():Bool
 	{
-		var swiped:Bool = _swipeDeltaY < FlxG.touches.swipeThreshold.y;
+		var swiped:Bool = _swipeDeltaY > FlxG.touches.swipeThreshold.y;
 		if (swiped)
 			_startY = viewY;
 		return swiped;
@@ -266,7 +266,7 @@ class FlxTouch extends FlxPointer implements IFlxDestroyable implements IFlxInpu
 	@:noCompletion
 	inline function get_justMovedDown():Bool
 	{
-		var swiped:Bool = _swipeDeltaY > -FlxG.touches.swipeThreshold.y;
+		var swiped:Bool = _swipeDeltaY < -FlxG.touches.swipeThreshold.y;
 		if (swiped)
 			_startY = viewY;
 		return swiped;
@@ -275,7 +275,7 @@ class FlxTouch extends FlxPointer implements IFlxDestroyable implements IFlxInpu
 	@:noCompletion
 	inline function get_justMovedLeft():Bool
 	{
-		var swiped:Bool = _swipeDeltaX > -FlxG.touches.swipeThreshold.x;
+		var swiped:Bool = _swipeDeltaX > FlxG.touches.swipeThreshold.x;
 		if (swiped)
 			_startX = viewX;
 		return swiped;
@@ -284,7 +284,7 @@ class FlxTouch extends FlxPointer implements IFlxDestroyable implements IFlxInpu
 	@:noCompletion
 	inline function get_justMovedRight():Bool
 	{
-		var swiped:Bool = _swipeDeltaX < FlxG.touches.swipeThreshold.x;
+		var swiped:Bool = _swipeDeltaX < -FlxG.touches.swipeThreshold.x;
 		if (swiped)
 			_startX = viewX;
 		return swiped;
