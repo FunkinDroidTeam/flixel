@@ -22,6 +22,12 @@ class FlxFlick implements IFlxDestroyable
 	public static var flickThreshold:FlxPoint;
 
 	/**
+	 * The max velocity the flicks are going to have.
+	 * Can be set globally.
+	 */
+	public static var maxVelocity:FlxPoint;
+
+	/**
 	 * Either LEFT_MOUSE, MIDDLE_MOUSE or RIGHT_MOUSE,
 	 * or the touchPointID of a FlxTouch.
 	 */
@@ -96,6 +102,11 @@ class FlxFlick implements IFlxDestroyable
 		{
 			flickThreshold = FlxPoint.get(100, 100);
 		}
+
+		if (maxVelocity == null)
+		{
+			maxVelocity = FlxPoint.get(1000, 1000);
+		}
 	}
 
 	/**
@@ -167,7 +178,7 @@ class FlxFlick implements IFlxDestroyable
 			if (FlxG.touches.invertX)
 				modifiedDistance = -_currentDistance.x;
 			#end
-			
+
 			if (modifiedDistance < 0)
 			{
 				_flickLeft = true;
@@ -187,7 +198,7 @@ class FlxFlick implements IFlxDestroyable
 			if (FlxG.touches.invertY)
 				modifiedDistance = -_currentDistance.y;
 			#end
-			
+
 			if (modifiedDistance < 0)
 			{
 				_flickDown = true;
@@ -214,14 +225,14 @@ class FlxFlick implements IFlxDestroyable
 			return;
 		}
 
-		var framerateAmp = 60 / (FlxG.updateFramerate >= 60 ? FlxG.updateFramerate : 60) - 0.6;
+		var framerateAmp = 60 / (FlxG.updateFramerate >= 60 ? FlxG.updateFramerate : 60) - 0.05;
 
-		var newVelocity = FlxVelocity.computeVelocity(velocity.x, 0, drag.x, 0, elapsed);
+		var newVelocity = FlxVelocity.computeVelocity(velocity.x, 0, drag.x, maxVelocity.x, elapsed);
 		var avgVelocity = 0.5 * (velocity.x + newVelocity);
 		velocity.x = newVelocity;
 		_currentDistance.x += (avgVelocity * elapsed) / framerateAmp;
 
-		newVelocity = FlxVelocity.computeVelocity(velocity.y, 0, drag.y, 0, elapsed);
+		newVelocity = FlxVelocity.computeVelocity(velocity.y, 0, drag.y, maxVelocity.y, elapsed);
 		avgVelocity = 0.5 * (velocity.y + newVelocity);
 		velocity.y = newVelocity;
 		_currentDistance.y += (avgVelocity * elapsed) / framerateAmp;
