@@ -225,7 +225,8 @@ class FlxFlick implements IFlxDestroyable
 			return;
 		}
 
-		var framerateAmp = 60 / (FlxG.updateFramerate >= 60 ? FlxG.updateFramerate : 60) - 0.05;
+		var framerateAmp = 60 / (FlxG.updateFramerate > 60 ? FlxG.updateFramerate : 60) - 0.05;
+		if (framerateAmp > 0.45) framerateAmp = 0.45;
 
 		var newVelocity = FlxVelocity.computeVelocity(velocity.x, 0, drag.x, maxVelocity.x, elapsed);
 		var avgVelocity = 0.5 * (velocity.x + newVelocity);
