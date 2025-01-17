@@ -162,7 +162,7 @@ class FlxFlick implements IFlxDestroyable
 			return;
 		}
 
-		if (Math.abs(velocity.x) + Math.abs(velocity.y) <= 10)
+		if (Math.abs(velocity.x) + Math.abs(velocity.y) <= 25)
 		{
 			destroy();
 			return;
@@ -219,7 +219,7 @@ class FlxFlick implements IFlxDestroyable
 	@:noCompletion
 	function updateMotion(elapsed:Float):Void
 	{
-		if (Math.abs(velocity.x) + Math.abs(velocity.y) <= 10)
+		if (Math.abs(velocity.x) + Math.abs(velocity.y) <= 25)
 		{
 			destroy();
 			return;
