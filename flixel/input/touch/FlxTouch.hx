@@ -146,7 +146,7 @@ class FlxTouch extends FlxPointer implements IFlxDestroyable implements IFlxInpu
 	 */
 	public function recycle(x:Int, y:Int, pointID:Int, pressure:Float):Void
 	{
-		setXY(x, y);
+		setXY(x, y, true);
 		input.ID = pointID;
 		input.reset();
 		this.pressure = pressure;
@@ -163,7 +163,7 @@ class FlxTouch extends FlxPointer implements IFlxDestroyable implements IFlxInpu
 		super();
 
 		input = new FlxInput(pointID);
-		setXY(x, y);
+		setXY(x, y, true);
 		this.pressure = pressure;
 	}
 
@@ -200,20 +200,32 @@ class FlxTouch extends FlxPointer implements IFlxDestroyable implements IFlxInpu
 	 *
 	 * @param	X	stageX touch coordinate
 	 * @param	Y	stageY touch coordinate
+	 * @param updatePrev Wether the previous touch position values should be updated with the current touch postion or new one
 	 */
-	function setXY(X:Int, Y:Int):Void
+	function setXY(X:Int, Y:Int, updatePrev:Bool = false):Void
 	{
 		calculateVelocity();
 
-		_prevX = x;
-		_prevY = y;
-		_prevViewX = viewX;
-		_prevViewY = viewY;
+		if (!updatePrev)
+		{
+			_prevX = x;
+			_prevY = y;
+			_prevViewX = viewX;
+			_prevViewY = viewY;
+		}
 
 		flashPoint.setTo(X, Y);
 		flashPoint = FlxG.game.globalToLocal(flashPoint);
 
 		setRawPositionUnsafe(flashPoint.x, flashPoint.y);
+
+		if (updatePrev)
+		{
+			_prevX = x;
+			_prevY = y;
+			_prevViewX = viewX;
+			_prevViewY = viewY;
+		}
 	}
 
 	/**
